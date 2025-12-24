@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Web Sitesi Tespiti - 224410054_SenanurOzbag</title>
+    <meta name="description" content="Makine öğrenmesi ile phishing web sitesi tespiti uygulaması">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <div class="logo-text">
+                        <h1>Phishing Tespit Sistemi</h1>
+                        <span class="subtitle">Makine Öğrenmesi Dersi Proje Sunumu</span>
+                    </div>
+                </div>
+                <div class="model-badge">
+                    <span class="badge-label">Aktif Model</span>
+                    <span class="badge-value" id="modelName">{{ model_name }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- URL Analiz Section -->
+            <section class="url-section">
+                <div class="section-header">
+                    <h2>Hızlı URL Analizi</h2>
+                    <p>Kontrol etmek istediğiniz web sitesinin URL adresini girin</p>
+                </div>
+
+                <div class="url-input-container">
+                    <div class="url-input-wrapper">
+                        <span class="url-icon"></span>
+                        <input type="text" id="urlInput" class="url-input"
+                            placeholder="https://example.com veya www.example.com" autocomplete="off">
+                        <button type="button" id="analyzeBtn" class="analyze-btn">
+                            <span class="btn-text">Analiz Et</span>
+                        </button>
+                    </div>
+                    <div class="url-examples">
+                        <span>Örnek URL'ler:</span>
+                        <button type="button" class="example-url-btn"
+                            data-url="https://www.google.com">google.com</button>
+                        <button type="button" class="example-url-btn"
+                            data-url="http://192.168.1.1/login/verify-account">Süpheli IP</button>
+                        <button type="button" class="example-url-btn"
+                            data-url="https://secure-login-bank.suspicious-site.com/account/verify">Phishing
+                            Örnegi</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- URL Analysis Results -->
+            <section class="results-section" id="urlResultsSection" style="display: none;">
+                <div class="section-header">
+                    <h2>Analiz Sonucu</h2>
+                </div>
+
+                <!-- Loading -->
+                <div class="loading" id="urlLoading">
+                    <div class="spinner"></div>
+                    <span>URL analiz ediliyor...</span>
+                </div>
+
+                <!-- Result Card -->
+                <div class="result-card" id="urlResultCard">
+                    <div class="analyzed-url" id="analyzedUrl"></div>
+
+                    <div class="result-status" id="urlResultStatus">
+                        <div class="status-icon" id="urlStatusIcon">✓</div>
+                        <div class="status-text">
+                            <h3 id="urlPredictionLabel">Güvenli Site</h3>
+                            <p id="urlConfidenceText">%95 olasılıkla güvenli</p>
+                        </div>
+                    </div>
+
+                    <div class="probability-bars">
+                        <div class="prob-item safe">
+                            <div class="prob-label">
+                                <span class="prob-title">Legitimate (Güvenli)</span>
+                                <span class="prob-value" id="urlProbSafe">0%</span>
+                            </div>
+                            <div class="prob-bar-container">
+                                <div class="prob-bar" id="urlProbBarSafe" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="prob-item danger">
+                            <div class="prob-label">
+                                <span class="prob-title">Phishing (Zararlı)</span>
+                                <span class="prob-value" id="urlProbDanger">0%</span>
+                            </div>
+                            <div class="prob-bar-container">
+                                <div class="prob-bar" id="urlProbBarDanger" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URL Özellikleri -->
+                    <div class="url-features-section" id="urlFeaturesSection">
+                        <h4>Tespit Edilen Özellikler</h4>
+                        <div class="url-features-grid" id="urlFeaturesGrid"></div>
+                    </div>
+
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Kullanılan Model:</span>
+                            <span class="detail-value" id="urlUsedModel">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tahmin (predict):</span>
+                            <span class="detail-value" id="urlPredictValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Analiz Edilen Özellik:</span>
+                            <span class="detail-value" id="urlFeatureCount">30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="warning-box" id="urlWarningBox" style="display: none;">
+                    <span class="warning-icon">!</span>
+                    <span class="warning-text" id="urlWarningText"></span>
+                </div>
+            </section>
+
+            <!-- Divider -->
+            <div class="section-divider">
+                <span>veya detaylı analiz için</span>
+            </div>
+
+            <!-- Manuel Form Section -->
+            <section class="form-section collapsed" id="manualFormSection">
+                <div class="section-header clickable" id="toggleManualForm">
+                    <h2>Detaylı Manuel Analiz</h2>
+                    <p>Tüm özellikleri manuel olarak girmek için tıklayın</p>
+                    <span class="toggle-icon">▼</span>
+                </div>
+
+                <form id="predictionForm" class="prediction-form" style="display: none;">
+                    <!-- URL Özellikleri -->
+                    <div class="form-group-container">
+                        <h3 class="group-title">URL Özellikleri</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="url_length">URL Uzunluğu</label>
+                                <input type="number" id="url_length" name="url_length" value="50" min="1" max="500">
+                                <span class="hint">Karakter sayısı</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="has_https">HTTPS var mı?</label>
+                                <select id="has_https" name="has_https">
+                                    <option value="1">Evet (Güvenli)</option>
+                                    <option value="0">Hayır</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="has_ip_address">IP Adresi var mı?</label>
+                                <select id="has_ip_address" name="has_ip_address">
+                                    <option value="0">Hayır</option>
+                                    <option value="1">Evet (Süpheli)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="num_dots">Nokta sayısı</label>
+                                <input type="number" id="num_dots" name="num_dots" value="2" min="0" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_hyphens">Tire sayısı (-)</label>
+                                <input type="number" id="num_hyphens" name="num_hyphens" value="0" min="0" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_underscores">Alt tire (_)</label>
+                                <input type="number" id="num_underscores" name="num_underscores" value="0" min="0"
+                                    max="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_slashes">Slash sayısı (/)</label>
+                                <input type="number" id="num_slashes" name="num_slashes" value="3" min="0" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_questionmarks">Soru isareti (?)</label>
+                                <input type="number" id="num_questionmarks" name="num_questionmarks" value="0" min="0"
+                                    max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_equals">Esittir sayısı (=)</label>
+                                <input type="number" id="num_equals" name="num_equals" value="0" min="0" max="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_at_symbols">@ sembolü</label>
+                                <input type="number" id="num_at_symbols" name="num_at_symbols" value="0" min="0"
+                                    max="5">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_ampersands">&amp; sembolü</label>
+                                <input type="number" id="num_ampersands" name="num_ampersands" value="0" min="0"
+                                    max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="num_digits">Rakam sayısı</label>
+                                <input type="number" id="num_digits" name="num_digits" value="0" min="0" max="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Özellikleri -->
+                    <div class="form-group-container">
+                        <h3 class="group-title">Domain Özellikleri</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="domain_length">Domain uzunluğu</label>
+                                <input type="number" id="domain_length" name="domain_length" value="15" min="1"
+                                    max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="path_length">Path uzunluğu</label>
+                                <input type="number" id="path_length" name="path_length" value="20" min="0" max="200">
+                            </div>
+                            <div class="form-group">
+                                <label for="subdomain_count">Subdomain sayısı</label>
+                                <input type="number" id="subdomain_count" name="subdomain_count" value="1" min="0"
+                                    max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="has_suspicious_words">Süpheli kelimeler?</label>
+                                <select id="has_suspicious_words" name="has_suspicious_words">
+                                    <option value="0">Hayır</option>
+                                    <option value="1">Evet (login, verify, bank vb.)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="domain_age_days">Domain yası (gün)</label>
+                                <input type="number" id="domain_age_days" name="domain_age_days" value="365" min="0"
+                                    max="10000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ranking Özellikleri -->
+                    <div class="form-group-container">
+                        <h3 class="group-title">Sıralama &amp; Istatistik</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="alexa_rank">Alexa sıralaması</label>
+                                <input type="number" id="alexa_rank" name="alexa_rank" value="100000" min="0"
+                                    max="10000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="google_index">Google'da indeksli mi?</label>
+                                <select id="google_index" name="google_index">
+                                    <option value="1">Evet</option>
+                                    <option value="0">Hayır</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="page_rank">Page Rank (0-10)</label>
+                                <input type="number" id="page_rank" name="page_rank" value="5" min="0" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="dns_record">DNS kaydı var mı?</label>
+                                <select id="dns_record" name="dns_record">
+                                    <option value="1">Evet</option>
+                                    <option value="0">Hayır</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="web_traffic">Web trafigi</label>
+                                <input type="number" id="web_traffic" name="web_traffic" value="10000" min="0"
+                                    max="1000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="links_in_tags">Tag'lardaki link sayısı</label>
+                                <input type="number" id="links_in_tags" name="links_in_tags" value="10" min="0"
+                                    max="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="links_pointing_to_page">Sayfaya gelen linkler</label>
+                                <input type="number" id="links_pointing_to_page" name="links_pointing_to_page"
+                                    value="50" min="0" max="1000">
+                            </div>
+                            <div class="form-group">
+                                <label for="statistical_report">Istatistik raporunda var mı?</label>
+                                <select id="statistical_report" name="statistical_report">
+                                    <option value="0">Hayır</option>
+                                    <option value="1">Evet (Süpheli listesinde)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Manuel Analiz Et</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Manuel Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="section-header">
+                    <h2>Analiz Sonucu</h2>
+                </div>
+
+                <!-- Loading -->
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <span>Analiz devam ediyor</span>
+                </div>
+
+                <!-- Result Card -->
+                <div class="result-card" id="resultCard">
+                    <div class="result-status" id="resultStatus">
+                        <div class="status-icon" id="statusIcon">✓</div>
+                        <div class="status-text">
+                            <h3 id="predictionLabel">Güvenli Site</h3>
+                            <p id="confidenceText">%95 olasılıkla güvenli</p>
+                        </div>
+                    </div>
+
+                    <div class="probability-bars">
+                        <div class="prob-item safe">
+                            <div class="prob-label">
+                                <span class="prob-title">Legitimate (Güvenli)</span>
+                                <span class="prob-value" id="probSafe">0%</span>
+                            </div>
+                            <div class="prob-bar-container">
+                                <div class="prob-bar" id="probBarSafe" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="prob-item danger">
+                            <div class="prob-label">
+                                <span class="prob-title">Phishing (Zararlı)</span>
+                                <span class="prob-value" id="probDanger">0%</span>
+                            </div>
+                            <div class="prob-bar-container">
+                                <div class="prob-bar" id="probBarDanger" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Kullanılan Model:</span>
+                            <span class="detail-value" id="usedModel">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tahmin (predict):</span>
+                            <span class="detail-value" id="predictValue">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Özellik Sayısı:</span>
+                            <span class="detail-value" id="featureCount">25</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="warning-box" id="warningBox" style="display: none;">
+                    <span class="warning-icon">!</span>
+                    <span class="warning-text" id="warningText"></span>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>224410054 - Senanur Özbag | Phishing Web Sitesi Tespiti Projesi | Makina Ögrenmesi Ders Sunumu</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

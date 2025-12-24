@@ -1,0 +1,8 @@
+Model,Ortalama Doğruluk,Std Sapma
+Logistic Regression,0.9090,0.0127
+Decision Tree,0.9159,0.0151
+Random Forest,0.9359,0.0096
+SVM,0.9342,0.0087
+KNN,0.9123,0.0121
+Voting Classifier,0.9357,0.0105
+Gradient Boosting,0.9410,0.0140

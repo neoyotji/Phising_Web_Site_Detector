@@ -1,0 +1,29 @@
+Model 1,Model 2,"b (M1✓, M2✗)","c (M1✗, M2✓)",Chi-square,P-değeri,Anlamlı mı?
+Logistic Regression,Decision Tree,39,52,1.5824,0.208413,Hayır
+Logistic Regression,Random Forest,15,37,8.4808,0.003589,Evet
+Logistic Regression,SVM,9,29,9.5000,0.002055,Evet
+Logistic Regression,KNN,39,38,0.0000,1.000000,Hayır
+Logistic Regression,Voting Classifier,5,29,15.5588,0.000080,Evet
+Logistic Regression,Gradient Boosting,18,43,9.4426,0.002120,Evet
+Logistic Regression,Neural Network,27,48,5.3333,0.020921,Evet
+Decision Tree,Random Forest,26,35,1.0492,0.305696,Hayır
+Decision Tree,SVM,31,38,0.5217,0.470101,Hayır
+Decision Tree,KNN,54,40,1.7979,0.179970,Hayır
+Decision Tree,Voting Classifier,25,36,1.6393,0.200415,Hayır
+Decision Tree,Gradient Boosting,24,36,2.0167,0.155580,Hayır
+Decision Tree,Neural Network,32,40,0.6806,0.409395,Hayır
+Random Forest,SVM,21,19,0.0250,0.874367,Hayır
+Random Forest,KNN,50,27,6.2857,0.012172,Evet
+Random Forest,Voting Classifier,12,14,0.0385,0.844519,Hayır
+Random Forest,Gradient Boosting,10,13,10.0000,0.677639,Hayır
+Random Forest,Neural Network,29,28,0.0000,1.000000,Hayır
+SVM,KNN,39,18,7.0175,0.008071,Evet
+SVM,Voting Classifier,6,10,6.0000,0.454498,Hayır
+SVM,Gradient Boosting,18,23,0.3902,0.532171,Hayır
+SVM,Neural Network,23,24,0.0000,1.000000,Hayır
+KNN,Voting Classifier,15,40,10.4727,0.001211,Evet
+KNN,Gradient Boosting,25,51,8.2237,0.004135,Evet
+KNN,Neural Network,24,46,6.3000,0.012074,Evet
+Voting Classifier,Gradient Boosting,17,18,0.0000,1.000000,Hayır
+Voting Classifier,Neural Network,26,23,0.0816,0.775097,Hayır
+Gradient Boosting,Neural Network,28,24,0.1731,0.677392,Hayır
